@@ -1,0 +1,30 @@
+.location-selector {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+}
+.location-selector .loc {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.location-selector .loc > * {
+  margin: 5px;
+}
+
+.dropdowns .dropdown > div {
+  height: 300px;
+  overflow-y: scroll;
+}
+
+.dropdowns {
+  display: flex;
+  flex-wrap: nowrap;
+}
+.dropdowns > * {
+  margin: 5px;
+}
