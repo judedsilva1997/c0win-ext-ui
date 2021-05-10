@@ -91,7 +91,6 @@ async function bookSlots(
   var [above18, above45] = splitBetween18and45(selectedBeneficiaries);
   const interval = setInterval(() => {
     apiCallFn(above18, above45).then(async (filteredCenters) => {
-      console.log(filteredCenters);
       for (const filteredCenter of filteredCenters) {
         filteredCenter.sessions.forEach((session) => {
           if (session.min_age_limit === 18 && above18.length > 0) {
@@ -105,7 +104,6 @@ async function bookSlots(
               ) {
                 return;
               }
-              console.log(bene);
               const status = await bookTheSession(
                 auth,
                 bene,
@@ -113,7 +111,6 @@ async function bookSlots(
                 filteredCenter,
                 captcha
               );
-              console.log(status);
               if (status) {
                 console.log(`Booked for ${bene}`);
                 bene.booked = true;
@@ -292,7 +289,6 @@ function LocationByPinCode() {
   );
 }
 function filterAvailabeCenters(data, above18, above45) {
-  console.log(data);
   if (data && data.centers) {
     const filteredCenters = data.centers.filter((center) => {
       var filteredSession = (center.sessions || []).filter((session) => {
@@ -324,7 +320,6 @@ function LocationByDistrict() {
 
   const bookedList = useRef([]);
   function addBeneficiariesToBooked(bene) {
-    console.log(bene);
     bookedList.current = [...bookedList.current, bene];
     setBookedBeneficiaries(bookedList.current);
   }
