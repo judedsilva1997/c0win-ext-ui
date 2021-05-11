@@ -90,72 +90,85 @@ async function bookSlots(
 ) {
   var [above18, above45] = splitBetween18and45(selectedBeneficiaries);
   const interval = setInterval(() => {
-    apiCallFn(above18, above45).then(async (filteredCenters) => {
-      for (const filteredCenter of filteredCenters) {
-        filteredCenter.sessions.forEach((session) => {
-          if (session.min_age_limit === 18 && above18.length > 0) {
-            above18.forEach(async (bene) => {
-              if (bene.booked) {
-                return;
-              }
-              if (
-                bene.vaccine &&
-                bene.vaccine.toUpperCase() !== session.vaccine.toUpperCase()
-              ) {
-                return;
-              }
-              const status = await bookTheSession(
-                auth,
-                bene,
-                session,
-                filteredCenter,
-                captcha
-              );
-              if (status) {
-                console.log(`Booked for ${bene}`);
-                bene.booked = true;
-                bene.center = filteredCenter.name;
-                bene.slot = `${session.date} ${session.slots[0]}`;
-                addBeneficiariesToBooked(bene);
-              }
-            });
-          }
-          if (session.min_age_limit === 45 && above45.length > 0) {
-            above45.forEach(async (bene) => {
-              if (bene.booked) {
-                return;
-              }
-              if (
-                bene.vaccine &&
-                bene.vaccine.toUpperCase() !== session.vaccine.toUpperCase()
-              ) {
-                return;
-              }
-              const status = await bookTheSession(
-                auth,
-                bene,
-                session,
-                filteredCenter,
-                captcha
-              );
-              if (status) {
-                console.log(`Booked for ${bene}`);
-                bene.booked = true;
-                bene.center = filteredCenter.name;
-                bene.slot = `${session.date} ${session.slots[0]}`;
-                addBeneficiariesToBooked(bene);
-              }
-            });
-          }
-        });
-      }
-      above18 = above18.filter((bene) => !bene.booked);
-      above45 = above45.filter((bene) => !bene.booked);
+    apiCallFn(above18, above45)
+      .then(async (filteredCenters) => {
+        for (const filteredCenter of filteredCenters) {
+          filteredCenter.sessions.forEach((session) => {
+            if (session.min_age_limit === 18 && above18.length > 0) {
+              above18.forEach(async (bene) => {
+                if (bene.booked) {
+                  return;
+                }
+                if (
+                  bene.vaccine &&
+                  bene.vaccine.toUpperCase() !== session.vaccine.toUpperCase()
+                ) {
+                  return;
+                }
+                const status = await bookTheSession(
+                  auth,
+                  bene,
+                  session,
+                  filteredCenter,
+                  captcha
+                );
+                if (status === 200) {
+                  console.log(`Booked for ${bene}`);
+                  bene.booked = true;
+                  bene.center = filteredCenter.name;
+                  bene.slot = `${session.date} ${session.slots[0]}`;
+                  addBeneficiariesToBooked(bene);
+                } else if (status === 401) {
+                  clearInterval(interval);
+                  auth.setAuthToken(null);
+                }
+              });
+            }
+            if (session.min_age_limit === 45 && above45.length > 0) {
+              above45.forEach(async (bene) => {
+                if (bene.booked) {
+                  return;
+                }
+                if (
+                  bene.vaccine &&
+                  bene.vaccine.toUpperCase() !== session.vaccine.toUpperCase()
+                ) {
+                  return;
+                }
+                const status = await bookTheSession(
+                  auth,
+                  bene,
+                  session,
+                  filteredCenter,
+                  captcha
+                );
+                if (status === 200) {
+                  console.log(`Booked for ${bene}`);
+                  bene.booked = true;
+                  bene.center = filteredCenter.name;
+                  bene.slot = `${session.date} ${session.slots[0]}`;
+                  addBeneficiariesToBooked(bene);
+                } else if (status === 401) {
+                  clearInterval(interval);
+                  auth.setAuthToken(null);
+                }
+              });
+            }
+          });
+        }
+        above18 = above18.filter((bene) => !bene.booked);
+        above45 = above45.filter((bene) => !bene.booked);
 
-      if (above18.length === 0 && above45.length === 0) {
-        clearInterval(interval);
-      }
-    });
+        if (above18.length === 0 && above45.length === 0) {
+          clearInterval(interval);
+        }
+      })
+      .catch((err) => {
+        if (err && err.response && err.response.status === 401) {
+          clearInterval(interval);
+          auth.setAuthToken(null);
+        }
+      });
   }, 10000);
 }
 async function bookTheSession(auth, bene, session, filteredCenter, captcha) {
@@ -170,11 +183,15 @@ async function bookTheSession(auth, bene, session, filteredCenter, captcha) {
   try {
     const response = await axios.post(`${urls.SCHEDULE}`, body, {
       headers: {
-        Authorization: `Bearer ${auth}`,
+        Authorization: `Bearer ${auth.authToken}`,
       },
     });
-    if (response.status === 200) return true;
-  } catch (err) {}
+    if (response.status === 200) return 200;
+  } catch (err) {
+    if (err && err.response && err.response.status === 401) {
+      return 401;
+    }
+  }
   return false;
 }
 
@@ -205,7 +222,11 @@ function LocationByPinCode() {
       const data = response.data;
       const filteredCenters = filterAvailabeCenters(data, above18, above45);
       return filteredCenters;
-    } catch (err) {}
+    } catch (err) {
+      if (err && err.response && err.response.status === 401) {
+        throw err;
+      }
+    }
     return [];
   });
   return (
@@ -233,7 +254,7 @@ function LocationByPinCode() {
           onClick={() => {
             setDisabled(true);
             bookSlots(
-              auth.authToken,
+              auth,
               selectedBeneficiaries.selectedBeneficiaries,
               apiCallFn,
               addBeneficiariesToBooked,
@@ -336,6 +357,7 @@ function LocationByDistrict() {
           },
         }
       );
+
       const data = response.data;
       var filteredCenters = filterAvailabeCenters(data, above18, above45);
       if (allowedZipCodes && allowedZipCodes != "")
@@ -343,7 +365,11 @@ function LocationByDistrict() {
           allowedZipCodes.includes(center.pincode)
         );
       return filteredCenters;
-    } catch (err) {}
+    } catch (err) {
+      if (err && err.response && err.response.status === 401) {
+        throw err;
+      }
+    }
     return [];
   });
 
@@ -354,12 +380,17 @@ function LocationByDistrict() {
           Authorization: `Bearer ${auth.authToken}`,
         },
       });
+
       const data = response.data;
       if (data && data.states) {
         setStatesList(data.states);
       }
     } catch (err) {
       console.log(err);
+      if (err && err.response && err.response.status === 401) {
+        auth.setAuthToken(null);
+        return;
+      }
     }
   }, []);
 
@@ -376,7 +407,10 @@ function LocationByDistrict() {
         setDistrictList(data.districts);
       }
     } catch (err) {
-      console.log(err);
+      if (err && err.response && err.response.status === 401) {
+        auth.setAuthToken(null);
+        return;
+      }
     }
   }
 
@@ -453,7 +487,7 @@ function LocationByDistrict() {
               onClick={() => {
                 setDisabled(true);
                 bookSlots(
-                  auth.authToken,
+                  auth,
                   selectedBeneficiaries.selectedBeneficiaries,
                   apiCallFn,
                   addBeneficiariesToBooked,

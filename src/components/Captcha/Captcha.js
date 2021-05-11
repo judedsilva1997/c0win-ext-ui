@@ -20,7 +20,12 @@ export default function Captcha({ setCaptcha }) {
       if (response.data && response.data.captcha) {
         setCaptchaImage(response.data.captcha);
       }
-    } catch (err) {}
+    } catch (err) {
+      if (err && err.response && err.response.status === 401) {
+        auth.setAuthToken(null);
+        return;
+      }
+    }
   }, []);
   return (
     <div className="captcha">

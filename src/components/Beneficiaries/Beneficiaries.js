@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { isValidElement, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import urls from "../../config";
 import "./Beneficiaries.css";
@@ -15,10 +15,16 @@ export default function Beneficiaries({ nextStep }) {
           Authorization: `Bearer ${auth.authToken}`,
         },
       });
+
       if (response && response.data) {
         setBeneficiaries(response.data.beneficiaries);
       }
-    } catch (err) {}
+    } catch (err) {
+      if (err && err.response && err.response.status === 401) {
+        auth.setAuthToken(null);
+        return;
+      }
+    }
   }, []);
   return (
     <div className="beneficiaries">

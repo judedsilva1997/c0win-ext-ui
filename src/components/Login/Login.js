@@ -1,16 +1,19 @@
 import axios from "axios";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Form, Button } from "react-bootstrap";
 import AuthContext from "../../context/AuthContext";
 import urls from "../../config";
 import { SHA256 } from "crypto-js";
-export default function Login() {
+export default function Login(props) {
   const { auth, selectedBeneficiaries } = useContext(AuthContext);
   const [mobile, setMobile] = useState("");
   const [txnId, setTxnId] = useState(false);
   const [otp, setOTP] = useState("");
   const [disabled, setDisabled] = useState(false);
-
+  useEffect(() => {
+    selectedBeneficiaries.setSelectedBeneficiaries([]);
+    props.setStep(0);
+  }, []);
   async function generateOTP() {
     setDisabled(true);
     if (mobile.match("[0-9]{10}")) {
