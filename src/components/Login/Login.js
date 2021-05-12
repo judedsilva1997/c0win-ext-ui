@@ -22,7 +22,9 @@ export default function Login(props) {
           mobile,
         });
         setTxnId(response.data.txnId);
-      } catch (err) {}
+      } catch (err) {
+        props.setError("Something went wrong");
+      }
     }
     setDisabled(false);
   }
@@ -43,6 +45,7 @@ export default function Login(props) {
       } catch (err) {
         console.log(err);
         setDisabled(false);
+        props.setError("Something went wrong");
       }
     }
   }

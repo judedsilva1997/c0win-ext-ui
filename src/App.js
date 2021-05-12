@@ -84,7 +84,7 @@ function App() {
                 Do not close/hide this extension until your slot is booked
               </li>
             </ul>
-            {!isChromeExtension && <Login setStep={setStep} />}
+            {!isChromeExtension && <Login {...{ setStep, setError }} />}
           </>
         )}
 

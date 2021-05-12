@@ -1,6 +1,6 @@
-const BASE_URL = "https://cdn-api.co-vin.in/api";
+// const BASE_URL = "https://cdn-api.co-vin.in/api";
 
-// const BASE_URL = "http://192.168.0.104:3000";
+const BASE_URL = "http://192.168.0.104:3000";
 
 export default {
   STATE_URL: `${BASE_URL}/v2/admin/location/states`,
