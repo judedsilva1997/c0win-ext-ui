@@ -10,6 +10,7 @@
   flex-flow: column;
   align-items: center;
   margin-top: 15px;
+  width: fit-content;
 }
 
 .location-selector .loc > * {

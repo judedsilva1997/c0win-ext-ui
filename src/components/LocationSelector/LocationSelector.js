@@ -21,7 +21,7 @@ export default function LocationSelector() {
 
   return (
     <div className="location-selector">
-      <h5>Select the location where we should search: </h5>
+      <h5>Select the location:</h5>
 
       <span>Location By : </span>
       <ButtonGroup toggle>
@@ -202,12 +202,14 @@ function LocationByPinCode() {
   const bookedList = useRef([]);
   const [captcha, setCaptcha] = useState();
   const { auth, selectedBeneficiaries } = useContext(AuthContext);
+  const [statusMessage, setStatusMessage] = useState("Booking...");
 
   function addBeneficiariesToBooked(bene) {
     bookedList.current = [...bookedList.current, bene];
     setBookedBeneficiaries(bookedList.current);
   }
   const apiCallFn = useCallback(async function (above18, above45) {
+    setStatusMessage("Checking for slots");
     var dateToday = new Date();
     const formattedDate = formatDate(dateToday);
     try {
@@ -221,8 +223,14 @@ function LocationByPinCode() {
       );
       const data = response.data;
       const filteredCenters = filterAvailabeCenters(data, above18, above45);
+      if (filteredCenters.length) {
+        setStatusMessage("Found probable slots");
+      } else {
+        setStatusMessage("No vacant slots");
+      }
       return filteredCenters;
     } catch (err) {
+      setStatusMessage("Some error response");
       if (err && err.response && err.response.status === 401) {
         throw err;
       }
@@ -233,17 +241,14 @@ function LocationByPinCode() {
     <>
       <div className="loc">
         <Form.Row>
-          <Form.Label column lg={2}>
-            Enter Pin Code
-          </Form.Label>
           <Col>
             <Form.Control
-              type="text"
+              type="number"
               onChange={(e) => {
                 setPinCode(e.target.value);
               }}
               value={pinCode}
-              placeholder="Pin Code"
+              placeholder="Enter Pin Code"
             />
           </Col>
         </Form.Row>
@@ -277,7 +282,7 @@ function LocationByPinCode() {
                 role="status"
                 aria-hidden="true"
               />
-              Booking ...
+              {statusMessage}
             </>
           )}
         </Button>
@@ -338,7 +343,7 @@ function LocationByDistrict() {
   const [allowedZipCodes, setAllowedZipCodes] = useState("");
   const [captcha, setCaptcha] = useState("");
   const { auth, selectedBeneficiaries } = useContext(AuthContext);
-
+  const [statusMessage, setStatusMessage] = useState("Booking...");
   const bookedList = useRef([]);
   function addBeneficiariesToBooked(bene) {
     bookedList.current = [...bookedList.current, bene];
@@ -346,6 +351,7 @@ function LocationByDistrict() {
   }
 
   const apiCallFn = useCallback(async function (above18, above45) {
+    setStatusMessage("Checking for slots");
     var dateToday = new Date();
     const formattedDate = formatDate(dateToday);
     try {
@@ -364,8 +370,14 @@ function LocationByDistrict() {
         filteredCenters = filteredCenters.filter((center) =>
           allowedZipCodes.includes(center.pincode)
         );
+      if (filteredCenters.length) {
+        setStatusMessage("Found probable slots");
+      } else {
+        setStatusMessage("No vacant slots");
+      }
       return filteredCenters;
     } catch (err) {
+      setStatusMessage("Some error response");
       if (err && err.response && err.response.status === 401) {
         throw err;
       }
@@ -510,7 +522,7 @@ function LocationByDistrict() {
                     role="status"
                     aria-hidden="true"
                   />
-                  Booking ...
+                  {statusMessage}
                 </>
               )}
             </Button>

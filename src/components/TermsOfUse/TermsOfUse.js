@@ -12,11 +12,11 @@ export default function TermsOfUse() {
       <Modal.Body>
         <p>
           This Application has been developed by the author as a POC. This app
-          in no way is a replacement for COWIN. Any
-          mistake/issues/liabilities/problems/penalties caused to the users
-          themselves/ to other users of cowin/ to the cowin app team, are agreed
-          upon by the user to be borne by the user themselves. The user thus
-          understands the risks of continuing.
+          in no way is a replacement for COWIN. Any mistake/ issues/
+          liabilities/ problems/ penalties caused to the users themselves/ to
+          other users of cowin/ to the cowin app team, are agreed upon by the
+          user to be borne by the user themselves. The user thus understands the
+          risks of continuing.
         </p>
         <p> If you disagree you may choose to close the app</p>
       </Modal.Body>

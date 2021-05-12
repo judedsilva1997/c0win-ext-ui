@@ -53,7 +53,7 @@ function App() {
   return (
     <div
       className="App"
-      {...(isChromeExtension && { style: { width: "600px" } })}
+      {...(isChromeExtension && { style: { width: "600px", height: "600px" } })}
     >
       <AuthContextProvider
         value={{
@@ -64,12 +64,12 @@ function App() {
           },
         }}
       >
-        <h1>Welcome to Cowin Booking Extension</h1>
+        <h2 className="title">Cowin Booking Helper</h2>
         {authToken ? (
           steps[step]
         ) : (
           <>
-            <h3>Instructions:</h3>
+            <h5>Instructions:</h5>
             <ul>
               {isChromeExtension && (
                 <li>

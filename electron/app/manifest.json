@@ -1,0 +1,13 @@
+{
+  "name": "Cowin Extension",
+  "description": "Cowin extension for booking your slots",
+  "version": "1.0",
+  "manifest_version": 3,
+  "permissions": ["storage","tabs","background","scripting"],
+  "host_permissions": [
+    "https://selfregistration.cowin.gov.in/*"],
+  "action": {
+    "default_popup": "index.html"
+  }
+  
+}
